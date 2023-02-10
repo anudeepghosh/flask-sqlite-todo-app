@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form id="form-add-task" method="POST" action="">
+    <div class="row" style="align-items: flex-end;">
+        <div hidden aria-hidden="true">
+            <input id="inp-id" type="text" class="form-control" disabled>
+            <input id="inp-txn-type" type="text" class="form-control" disabled value="add">
+        </div>
+        <div class="col" style="text-align: start;">
+            <label for="inp-task">Task Details</label>
+            <input id="inp-task" type="text" class="form-control" placeholder="Create a memo for..." aria-label="Task">
+        </div>
+        <div class="col" style="text-align: start;">
+            <label for="inp-remind">Reminder Date Time</label>
+            <input id="inp-remind" type="datetime-local" class="form-control" placeholder="Remind At/On"
+                aria-label="Remind At/On">
+        </div>
+        <div class="col">
+            <button id="btn-add-task" type="submit" class="btn btn-primary">Add Task</button>
+        </div>
+        <div class="col" hidden aria-hidden="true">
+            <button id="btn-update-task" type="submit" class="btn btn-secondary" onclick="">Update Task</button>
+        </div>
+    </div>
+</form>
+
+<hr />
+<h2 class="display-6 fw-bold">{% block title %} Task List {% endblock %}</h2>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <tr hidden>Id</tr>
+                <th>ToDo</th>
+                <th>Created On</th>
+                <th>Remind On/At</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data Row -->
+            <tr>
+                <td hidden></td>
+                <td class="col-4 ellipsis">
+                    <span>Create a docker-compose file.</span>
+                </td>
+                <td class="col-2">
+                    <span>07:10 PM - 25th Jan, 2023</span>
+                </td>
+                <td class="col-2">
+                    <span>10:00 AM - 26th Jan, 2023</span>
+                </td>
+                <td class="col-2">
+                    <span>Active</span>
+                </td>
+                <td class="col-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-success">Mark as done</button>
+                        <button type="button" class="btn btn-outline-primary">Update Task</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td hidden></td>
+                <td class="col-4 ellipsis">
+                    <span style="text-decoration: line-through;">Create a new Dashboard</span>
+                </td>
+                <td class="col-2">
+                    <span>07:10 PM - 25th Jan, 2023</span>
+                </td>
+                <td class="col-2">
+                    <span>10:00 AM - 26th Jan, 2023</span>
+                </td>
+                <td class="col-2">
+                    <span>Done</span>
+                </td>
+                <td class="col-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-danger">Delete Task</button>
+                        <button type="button" class="btn btn-outline-primary">Update Task</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td hidden></td>
+                <td class="col-4 ellipsis">
+                    <span>Reminder for match</span>
+                </td>
+                <td class="col-2">
+                    <span>07:10 PM - 25th Jan, 2023</span>
+                </td>
+                <td class="col-2">
+                    <span>10:00 AM - 26th Jan, 2023</span>
+                </td>
+                <td class="col-2">
+                    <span>Active,<br />Reminder Expired</span>
+                </td>
+                <td class="col-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-success">Mark as done</button>
+                        <button type="button" class="btn btn-outline-primary">Update Task</button>
+                    </div>
+                    <!-- <button type="button" class="btn btn-outline-success btn-sm">Mark as done</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm">Update Task</button> -->
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- <h3>{{ utc_dt }}</h3> -->
+<script>
+    $(document).ready(function() {
+        // console.log('Submit form');
+        $('#form-add-task').submit(function(event) {
+            var txn_type = $('#inp-txn-type').val();
+            if (txn_type == 'add') {
+                // Add Task
+                console.log('Adding the task');
+                var formData = {
+                    task: $('#inp-task').val(),
+                    reminder: $('#inp-remind').val(),
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/task/new',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                }).done(function() {
+                    console.log('To-do task added successfully');
+                    toast_message('Task added successfully!')
+                }).fail(function(error) {
+                    console.error('Failed to add task to-do');
+                    console.error('Cause: ' + error);
+                }).always(function(data) {
+                    console.log(data);
+                });
+            } else {
+                // Update Task
+                console.log('Updating the task');
+                var formData = {
+                    id: $('#inp-id').val(),
+                    task: $('#inp-task').val(),
+                    reminder: $('#inp-remind').val(),
+                };
+                $.ajax({
+                    type: 'PUT',
+                    url: '/task',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                }).done(function() {
+                    console.log('To-do task added successfully');
+                }).fail(function(error) {
+                    console.error('Failed to add task to-do');
+                    console.error('Cause: ' + error);
+                }).always(function(data) {
+                    console.log(data);
+                });
+            }
+            console.log('form submitted')
+            event.preventDefault();
+        });
+    });
+
+    function get_tasks() {
+        console.log('Fetch Tasks');
+        $.ajax({
+            type: 'GET',
+            url: '/tasks',
+            contentType: 'application/json',
+        }).done(function() {
+            console.log('Tasks fetched successfully');
+        }).fail(function(error) {
+            console.error('Failed to fetch to-do task');
+            console.error('Cause: ' + error);
+        }).always(function(data) {
+            console.log(data);
+        });
+    }
+
+    function toast_message(message, delayT = 5000) {
+        console.log(delayT)
+        let toast_html = '<div class="position-fixed top-0 start-0 p-3" style="z-index: 11">' +
+            '<div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="'+delayT+'">'+
+            '<div class="toast-header"><strong class="me-auto">Alert</strong> <button type="button" class="btn-close"' +
+            'data-bs-dismiss="toast" aria-label="Close"></button> </div>' +
+            '<div class="toast-body">' + message + '</div></div></div>';
+        $('#liveToast').parent().remove();
+        $("body").append(toast_html);
+        // var toastTrigger = document.getElementById('liveToastBtn')
+        var toastLiveExample = document.getElementById('liveToast')
+
+        let toast = new bootstrap.Toast(toastLiveExample)
+        toast.show()
+    }
+</script>
+{% endblock %}
+
