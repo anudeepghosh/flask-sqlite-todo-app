@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, jsonify
 from models import session as session, Task as Task
 from datetime import datetime
 import traceback
+from models import app
 
-app = Flask(__name__)
+if __name__ == '__main__':
+    app.run()
 
 @app.route('/')
 def landing_page():
@@ -14,10 +16,13 @@ def get_tasks():
     try:
         pass
         print('Fetch request received')
-        # session.
+        # for task in session.query(Task).all():
+            # print(json.dumps(rec))
+        # print(session.query(Task.t_id, Task.task, Task.created_on, Task.remind_on, Task.status).all())
         return jsonify({'tasks':[]})
     except:
-        return 'Error adding the task'
+        traceback.print_exc()
+        return 'Error fetching the task'
 
     
 

@@ -1,20 +1,19 @@
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import Column, Integer, String, DateTime, Table, create_engine, MetaData
-from sqlalchemy.orm import relationship, backref, Session
-# from sqlalchemy.ext.declarative import declarative_base
+from flask import Flask, request, redirect
+from flask.templating import render_template
+from flask_sqlalchemy import SQLAlchemy
 
-Base = automap_base()
+app = Flask(__name__)
+app.debug = True
+# adding configuration for using a sqlite database
+app.config['SQLALCHEMY_DATABASE_URI']  = 'sqlite:///task.db'
 
-# class Task(Base):
-#     __tablename__ = "task"
-#     t_id = Column(Integer, primary_key=True)
-#     task = Column(String)
-#     created_on = Column(DateTime)
-#     remind_on = Column(DateTime)
-#     status = Column(String)
+# Creating an SQLAlchemy instance
+db = SQLAlchemy(app)
 
-conn_str = 'sqlite:///task.db'
-engine = create_engine(conn_str, echo=True)
-Base.prepare(engine, reflect=True)
-Task = Base.classes.task
-session = Session(engine)
+class Task(db.Model):
+    __tablename__ = "task"
+    t_id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(250), nullable=False)
+    created_on = db.Column(db.DateTime, nullable=False)
+    remind_on = db.Column(db.DateTime)
+    status = db.Column(db.String(20))
